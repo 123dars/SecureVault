@@ -1,0 +1,16 @@
+Flask
+Flask-Cors
+Flask-SQLAlchemy
+Flask-JWT-Extended
+Werkzeug
+gunicorn
+python-dotenv
+pycryptodome
+bcrypt
+pyotp
+qrcode
+bleach
+Flask-Limiter
+pyotp==2.9.0
+qrcode==7.4.2
+Pillow==10.3.0

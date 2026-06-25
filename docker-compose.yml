@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    # --- NEW: Gunicorn command with 120s timeout and 4 threads to prevent crashes ---
+    command: gunicorn --bind 0.0.0.0:5000 --timeout 120 --workers 3 --threads 4 app:app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - sqlite_data:/app/instance  # <--- THIS IS THE MAGIC FIX
+    environment:
+      - FLASK_ENV=development
+      - JWT_SECRET_KEY=super-secret-enterprise-key-123! 
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+# --- Declare the named volume here so Docker can build it ---
+volumes:
+  sqlite_data:

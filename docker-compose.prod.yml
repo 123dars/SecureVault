@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend
+    command: gunicorn --bind 0.0.0.0:5000 --timeout 120 --workers 3 --threads 4 app:app
+    volumes:
+      - sqlite_data:/app/instance
+    environment:
+      - FLASK_ENV=production
+      # In a real deployment, change this key!
+      - JWT_SECRET_KEY=super-secret-enterprise-key-123! 
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80" # We are now exposing the standard HTTP port 80!
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

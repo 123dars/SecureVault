@@ -1,0 +1,26 @@
+# Node
+node_modules/
+npm-debug.log
+frontend/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+
+# Database & Docker Volumes
+instance/
+backend/instance/
+*.sqlite3
+*.db
+sqlite_data/
+
+# Environment Variables
+.env
+
+# OS Files
+.DS_Store
+Thumbs.db
