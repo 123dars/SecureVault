@@ -13,9 +13,7 @@ import {
   CheckCircle2, Circle, Search, Filter, ShieldCheck,
   LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown, Key
 } from 'lucide-react';
-
 const CATEGORIES = ['General', 'Work', 'Finance', 'Social', 'Gaming', 'Shopping'];
-
 const CATEGORY_COLORS = {
   General:  'bg-slate-400',
   Work:     'bg-blue-400',
@@ -24,7 +22,6 @@ const CATEGORY_COLORS = {
   Gaming:   'bg-rose-400',
   Shopping: 'bg-amber-400',
 };
-
 function StrengthBar({ criteria }) {
   const met = Object.values(criteria).filter(Boolean).length;
   const levels = [
@@ -48,7 +45,6 @@ function StrengthBar({ criteria }) {
     </div>
   );
 }
-
 export default function Vault() {
   const { user, logout } = useContext(AuthContext);
   const [passwords,       setPasswords]       = useState([]);
@@ -63,9 +59,7 @@ export default function Vault() {
   const [criteria,        setCriteria]        = useState({
     length: false, uppercase: false, lowercase: false, number: false, special: false,
   });
-
   const masterPassword = sessionStorage.getItem('masterPassword');
-
   const fetchPasswords = useCallback(async () => {
     try {
       const res = await api.get('/api/passwords');
@@ -83,25 +77,20 @@ export default function Vault() {
       setLoading(false);
     }
   }, [masterPassword]);
-
   useEffect(() => { fetchPasswords(); }, [fetchPasswords]);
-
   useEffect(() => {
     const warnTimer = setTimeout(() => setSessionWarning(true),  13 * 60 * 1000);
     const lockTimer = setTimeout(() => logout(),                 15 * 60 * 1000);
     return () => { clearTimeout(warnTimer); clearTimeout(lockTimer); };
   }, [logout]);
-
   const vaultHealth = useMemo(() => {
     if (passwords.length === 0) return { totalScore: 100, weakPasswords: [], reusedPasswords: [] };
     return runSecurityAudit(passwords);
   }, [passwords]);
-
   const scoreColor =
     vaultHealth.totalScore === 100 ? 'text-emerald-400 border-emerald-500' :
     vaultHealth.totalScore >= 70   ? 'text-amber-400 border-amber-500'     :
                                      'text-rose-400 border-rose-500';
-
   const handlePasswordChange = (e) => {
     const val = e.target.value;
     setNewForm({ ...newForm, password: val });
@@ -113,13 +102,11 @@ export default function Vault() {
       special:   /[^A-Za-z0-9]/.test(val),
     });
   };
-
   const handleCopyPassword = () => {
     if (!newForm.password) return;
     navigator.clipboard.writeText(newForm.password);
     toast.success("Password copied!", { icon: '📋', style: { background: '#1e293b', color: '#fff' } });
   };
-
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!masterPassword) {
@@ -131,7 +118,6 @@ export default function Vault() {
       toast.error("Please enter a password or PIN!", { style: { background: '#1e293b', color: '#fff' } });
       return;
     }
-
     try {
       const pwdEncrypt = encryptData(newForm.password, masterPassword);
       
@@ -143,7 +129,6 @@ export default function Vault() {
         totpCiphertext = totpEncrypt.ciphertext;
         totpIv = totpEncrypt.iv;
       }
-
       await api.post('/api/passwords', {
         site_name:             newForm.site_name,
         username:              newForm.username,
@@ -165,7 +150,6 @@ export default function Vault() {
       toast.error("Failed to save credential.", { style: { background: '#1e293b', color: '#fff' } });
     }
   };
-
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex items-center gap-3">
@@ -194,7 +178,6 @@ export default function Vault() {
       </div>
     ), { style: { background: '#1e293b', color: '#fff' }, duration: 8000 });
   };
-
   const CriteriaItem = ({ met, text }) => (
     <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all duration-300 ${
       met
@@ -205,27 +188,22 @@ export default function Vault() {
       {text}
     </div>
   );
-
   const filteredPasswords = passwords.filter(p => {
     const matchesSearch   = p.site_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (p.username && p.username.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = filterCategory === 'All' || p.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
-
   const scrollToForm = () => {
     document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
   };
-
   return (
     <div className="min-h-screen bg-[#0B0F19] font-sans selection:bg-emerald-500/30 pb-20 relative animate-in fade-in duration-300">
-
       <div
         className="fixed inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none z-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop')" }}
       />
       <div className="fixed inset-0 bg-gradient-to-br from-[#0B0F19]/95 via-[#0B0F19]/90 to-emerald-950/40 pointer-events-none z-0" />
-
       {sessionWarning && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/95 backdrop-blur-sm text-black text-sm font-bold text-center py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg">
           <ShieldAlert size={16} />
@@ -238,7 +216,6 @@ export default function Vault() {
           </button>
         </div>
       )}
-
       <nav className="sticky top-0 z-50 bg-[#111827]/80 backdrop-blur-xl border-b border-slate-800/60 shadow-lg shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -268,9 +245,7 @@ export default function Vault() {
           </div>
         </div>
       </nav>
-
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-
         {!loading && passwords.length > 0 && (
           <div className="bg-[#111827]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
@@ -303,13 +278,11 @@ export default function Vault() {
             </div>
           </div>
         )}
-
         <div className="bg-[#111827]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80 mb-10">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <span className="bg-emerald-500/20 text-emerald-500 w-8 h-8 flex items-center justify-center rounded-full text-sm border border-emerald-500/30">+</span>
             Encrypt New Credential
           </h2>
-
           <form onSubmit={handleAdd} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
@@ -341,7 +314,6 @@ export default function Vault() {
                 <ChevronDown size={16} className="absolute right-3.5 top-4 text-slate-500 pointer-events-none" />
               </div>
             </div>
-
             <div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
@@ -385,9 +357,7 @@ export default function Vault() {
                   <Wand2 size={18} /> {showGenerator ? 'Hide Generator' : 'Generate'}
                 </button>
               </div>
-
               <StrengthBar criteria={criteria} />
-
               {/* NEW: Optional 2FA Secret Input */}
               <div className="mt-4 relative">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -401,7 +371,6 @@ export default function Vault() {
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-emerald-500/20 bg-emerald-950/20 text-emerald-400 placeholder-emerald-500/50 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono tracking-widest uppercase text-sm"
                 />
               </div>
-
               {showGenerator && (
                 <div className="mt-4 p-5 bg-[#0B0F19]/80 rounded-2xl border border-emerald-500/20 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
                   <PasswordGenerator
@@ -414,7 +383,6 @@ export default function Vault() {
                 </div>
               )}
             </div>
-
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
@@ -426,7 +394,6 @@ export default function Vault() {
             </div>
           </form>
         </div>
-
         <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-[#111827]/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-700/50 shadow-lg">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-3.5 text-slate-500" size={20} />
@@ -471,7 +438,6 @@ export default function Vault() {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1, 2, 3].map(n => <SkeletonCard key={n} />)
@@ -495,7 +461,6 @@ export default function Vault() {
             <EmptyVault onAdd={scrollToForm} />
           )}
         </div>
-
       </main>
     </div>
   );
