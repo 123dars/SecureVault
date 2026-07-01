@@ -56,7 +56,6 @@ export default function Vault() {
   const [searchTerm,      setSearchTerm]      = useState('');
   const [filterCategory,  setFilterCategory]  = useState('All');
   
-  // NEW: Added totp_secret to the newForm state!
   const [newForm,         setNewForm]         = useState({ site_name: '', username: '', password: '', totp_secret: '', category: 'General' });
   const [showGenerator,   setShowGenerator]   = useState(false);
   const [showPassword,    setShowPassword]    = useState(false);
@@ -72,10 +71,7 @@ export default function Vault() {
       const res = await api.get('/api/passwords');
       const decryptedVault = res.data.map(item => ({
         ...item,
-        // Decrypt the password exactly as before
         password: decryptData(item.encrypted_password, item.iv, masterPassword),
-        
-        // NEW: Decrypt the TOTP secret if it exists!
         totp_secret: item.encrypted_totp_secret 
           ? decryptData(item.encrypted_totp_secret, item.totp_iv, masterPassword) 
           : null
@@ -137,14 +133,12 @@ export default function Vault() {
     }
 
     try {
-      // 1. Encrypt the password
       const pwdEncrypt = encryptData(newForm.password, masterPassword);
       
-      // 2. Encrypt the 2FA TOTP Secret (if provided)
       let totpCiphertext = null;
       let totpIv = null;
       if (newForm.totp_secret && newForm.totp_secret.trim() !== '') {
-        const cleanSecret = newForm.totp_secret.replace(/\s+/g, '').toUpperCase(); // Clean it up
+        const cleanSecret = newForm.totp_secret.replace(/\s+/g, '').toUpperCase();
         const totpEncrypt = encryptData(cleanSecret, masterPassword);
         totpCiphertext = totpEncrypt.ciphertext;
         totpIv = totpEncrypt.iv;
@@ -226,14 +220,12 @@ export default function Vault() {
   return (
     <div className="min-h-screen bg-[#0B0F19] font-sans selection:bg-emerald-500/30 pb-20 relative animate-in fade-in duration-300">
 
-      {/* Background */}
       <div
         className="fixed inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none z-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop')" }}
       />
       <div className="fixed inset-0 bg-gradient-to-br from-[#0B0F19]/95 via-[#0B0F19]/90 to-emerald-950/40 pointer-events-none z-0" />
 
-      {/* Session timeout warning */}
       {sessionWarning && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/95 backdrop-blur-sm text-black text-sm font-bold text-center py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg">
           <ShieldAlert size={16} />
@@ -247,7 +239,6 @@ export default function Vault() {
         </div>
       )}
 
-      {/* Header */}
       <nav className="sticky top-0 z-50 bg-[#111827]/80 backdrop-blur-xl border-b border-slate-800/60 shadow-lg shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -280,7 +271,6 @@ export default function Vault() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
-        {/* Vault Health Dashboard */}
         {!loading && passwords.length > 0 && (
           <div className="bg-[#111827]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
@@ -314,7 +304,6 @@ export default function Vault() {
           </div>
         )}
 
-        {/* Add New Credential Form */}
         <div className="bg-[#111827]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80 mb-10">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <span className="bg-emerald-500/20 text-emerald-500 w-8 h-8 flex items-center justify-center rounded-full text-sm border border-emerald-500/30">+</span>
@@ -438,7 +427,6 @@ export default function Vault() {
           </form>
         </div>
 
-        {/* Search and Filter */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-[#111827]/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-700/50 shadow-lg">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-3.5 text-slate-500" size={20} />
@@ -484,7 +472,6 @@ export default function Vault() {
           </div>
         </div>
 
-        {/* Password Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1, 2, 3].map(n => <SkeletonCard key={n} />)
