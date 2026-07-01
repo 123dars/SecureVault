@@ -16,7 +16,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     api.get('/auth/me')
       .then(response => {
-        setUser(response.data); 
+        // NEW CHECK: If they closed the tab, their masterPassword was wiped.
+        // We MUST force them to log in again to get the decryption key.
+        if (!sessionStorage.getItem('masterPassword')) {
+          setUser(null);
+          api.post('/auth/logout'); // Tell the backend to kill the cookie
+        } else {
+          setUser(response.data); 
+        }
       })
       .catch(() => {
         setUser(null); 
