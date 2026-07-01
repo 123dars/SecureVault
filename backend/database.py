@@ -27,8 +27,15 @@ class Password(db.Model):
     site_name = db.Column(db.String(100), nullable=False)
     site_url = db.Column(db.String(255))
     username = db.Column(db.String(100))
+    
     encrypted_password = db.Column(db.LargeBinary, nullable=False)
     iv = db.Column(db.LargeBinary, nullable=False)
+    
+    # --- NEW COLUMNS FOR 2FA TOTP ---
+    encrypted_totp_secret = db.Column(db.LargeBinary, nullable=True)
+    totp_iv = db.Column(db.LargeBinary, nullable=True)
+    # --------------------------------
+    
     category = db.Column(db.String(50), default='General')
     favorite = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow) # Track record age
