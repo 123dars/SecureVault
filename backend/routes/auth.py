@@ -54,7 +54,9 @@ def login():
         totp = pyotp.TOTP(user.mfa_secret)
         if not totp.verify(totp_code):
             return jsonify({"error": "Invalid 2FA code"}), 401
-    access_token = create_access_token(identity=user.id)
+    # FIXED: Convert user.id to string to satisfy flask_jwt_extended strict requirements
+    access_token = create_access_token(identity=str(user.id))
+    
     response = jsonify({
         "message": "Login successful", 
         "username": user.username,
