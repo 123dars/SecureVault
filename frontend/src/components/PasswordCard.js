@@ -28,18 +28,15 @@ export default function PasswordCard({ site_name, username, password, totp_secre
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // States for Dark Web Breach Detection
   const [isLeaked, setIsLeaked] = useState(false);
   const [leakCount, setLeakCount] = useState(0);
 
-  // States for Built-in 2FA (TOTP)
   const [totpCode, setTotpCode] = useState('');
   const [totpTimeLeft, setTotpTimeLeft] = useState(30);
 
   const cat = CATEGORY_STYLES[category?.toLowerCase()] ?? CATEGORY_STYLES.other;
   const strength = getStrength(password);
 
-  // --- LIVE 2FA TOTP GENERATOR ---
   useEffect(() => {
     if (!totp_secret) return;
     
@@ -51,13 +48,10 @@ export default function PasswordCard({ site_name, username, password, totp_secre
     };
     
     updateTotp();
-    // Update the live timer every 1 second
     const interval = setInterval(updateTotp, 1000);
     return () => clearInterval(interval);
   }, [totp_secret]);
-  // -------------------------------
 
-  // The HaveIBeenPwned API check using k-Anonymity
   useEffect(() => {
     async function checkLeak() {
       if (!password) return;
@@ -106,7 +100,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
   return (
     <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 flex flex-col ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
 
-      {/* Category badge & Breach Warning */}
       <div className="flex justify-between items-start">
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${cat.bg} ${cat.text} ${cat.border}`}>
           {category}
@@ -120,14 +113,12 @@ export default function PasswordCard({ site_name, username, password, totp_secre
         )}
       </div>
 
-      {/* Site + username */}
       <h3 className="mt-2.5 mb-0.5 text-base font-bold text-white truncate">{site_name}</h3>
       <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-4 truncate">
         <User size={11} className="shrink-0" />
         {username || 'No username'}
       </p>
 
-      {/* NEW: 2FA LIVE TOTP ROW */}
       {totp_secret && (
         <div className="relative bg-emerald-950/30 px-3 py-2.5 rounded-xl border border-emerald-500/30 mb-3 flex items-center gap-3">
           <span className="flex-1 font-mono text-xl font-bold text-emerald-400 tracking-[0.2em]">
@@ -146,9 +137,7 @@ export default function PasswordCard({ site_name, username, password, totp_secre
           </div>
         </div>
       )}
-      {/* ------------------------ */}
 
-      {/* Password row */}
       <div className={`relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-700/50'}`}>
         <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 tracking-[4px]'}`}>
           {showPassword ? password : '••••••••••••'}
@@ -156,7 +145,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
         <button
           onClick={() => setShowPassword(v => !v)}
           className="shrink-0 text-slate-500 hover:text-slate-300 transition-colors"
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
           {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
@@ -164,7 +152,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
 
       <div className="flex-grow"></div>
 
-      {/* Strength meter */}
       <div className="mb-4 mt-auto">
         <p className="text-[10px] text-slate-500 mb-1.5">
           Strength: <span className={`font-semibold ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
@@ -179,7 +166,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex gap-2">
         <button
           onClick={handleCopy}
@@ -195,7 +181,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
         <button
           onClick={onDelete}
           className="p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all duration-200"
-          aria-label="Delete credential"
         >
           <Trash2 size={15} />
         </button>
