@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle, Clock } from 'lucide-react';
-import { generateTOTP, getTotpTimeLeft } from '../utils/totp';
+import { generateTOTP, getTotpTimeLeft } from '../utils/totp'; // NEW: Using your custom TOTP engine!
+
 const CATEGORY_STYLES = {
   social:   { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/20'  },
   finance:  { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
@@ -43,16 +44,10 @@ export default function PasswordCard({ site_name, username, password, totp_secre
     if (!totp_secret) return;
     
     const updateTotp = () => {
-      try {
-        // Clean the secret by removing spaces (in case user pasted it weird)
-        const cleanSecret = totp_secret.replace(/\s+/g, '').toUpperCase();
-        const token = authenticator.generate(cleanSecret);
-        setTotpCode(token);
-        setTotpTimeLeft(authenticator.timeRemaining());
-      } catch (err) {
-        console.error("Invalid TOTP Secret", err);
-        setTotpCode("INVALID");
-      }
+      if (!totp_secret) return;
+      const token = generateTOTP(totp_secret);
+      setTotpCode(token);
+      setTotpTimeLeft(getTotpTimeLeft());
     };
     
     updateTotp();
