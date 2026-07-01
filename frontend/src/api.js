@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // Dynamically switch between Nginx relative paths in production and localhost in development
-  baseURL: process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000', 
+  baseURL: process.env.NODE_ENV === 'production' ? '' : 'https://securevault-i2bo.onrender.com', 
   withCredentials: true
 });
 
