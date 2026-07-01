@@ -11,7 +11,7 @@ import PasswordGenerator from '../components/PasswordGenerator';
 import toast from 'react-hot-toast';
 import {
   CheckCircle2, Circle, Search, Filter, ShieldCheck,
-  LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown
+  LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown, Key
 } from 'lucide-react';
 
 const CATEGORIES = ['General', 'Work', 'Finance', 'Social', 'Gaming', 'Shopping'];
@@ -55,7 +55,9 @@ export default function Vault() {
   const [loading,         setLoading]         = useState(true);
   const [searchTerm,      setSearchTerm]      = useState('');
   const [filterCategory,  setFilterCategory]  = useState('All');
-  const [newForm,         setNewForm]         = useState({ site_name: '', username: '', password: '', category: 'General' });
+  
+  // NEW: Added totp_secret to the newForm state!
+  const [newForm,         setNewForm]         = useState({ site_name: '', username: '', password: '', totp_secret: '', category: 'General' });
   const [showGenerator,   setShowGenerator]   = useState(false);
   const [showPassword,    setShowPassword]    = useState(false);
   const [sessionWarning,  setSessionWarning]  = useState(false);
@@ -70,7 +72,13 @@ export default function Vault() {
       const res = await api.get('/api/passwords');
       const decryptedVault = res.data.map(item => ({
         ...item,
+        // Decrypt the password exactly as before
         password: decryptData(item.encrypted_password, item.iv, masterPassword),
+        
+        // NEW: Decrypt the TOTP secret if it exists!
+        totp_secret: item.encrypted_totp_secret 
+          ? decryptData(item.encrypted_totp_secret, item.totp_iv, masterPassword) 
+          : null
       }));
       setPasswords(decryptedVault);
     } catch (err) {
@@ -123,35 +131,47 @@ export default function Vault() {
       return;
     }
     
-    // NEW LOGIC: Only check if they actually typed a password.
-    // It doesn't matter if it's "weak" or just 4 numbers for a Bank PIN.
     if (newForm.password.length === 0) {
       toast.error("Please enter a password or PIN!", { style: { background: '#1e293b', color: '#fff' } });
       return;
     }
 
     try {
-      const { ciphertext, iv } = encryptData(newForm.password, masterPassword);
+      // 1. Encrypt the password
+      const pwdEncrypt = encryptData(newForm.password, masterPassword);
+      
+      // 2. Encrypt the 2FA TOTP Secret (if provided)
+      let totpCiphertext = null;
+      let totpIv = null;
+      if (newForm.totp_secret && newForm.totp_secret.trim() !== '') {
+        const cleanSecret = newForm.totp_secret.replace(/\s+/g, '').toUpperCase(); // Clean it up
+        const totpEncrypt = encryptData(cleanSecret, masterPassword);
+        totpCiphertext = totpEncrypt.ciphertext;
+        totpIv = totpEncrypt.iv;
+      }
+
       await api.post('/api/passwords', {
-        site_name:          newForm.site_name,
-        username:           newForm.username,
-        encrypted_password: ciphertext,
-        iv,
-        category:           newForm.category,
+        site_name:             newForm.site_name,
+        username:              newForm.username,
+        encrypted_password:    pwdEncrypt.ciphertext,
+        iv:                    pwdEncrypt.iv,
+        encrypted_totp_secret: totpCiphertext,
+        totp_iv:               totpIv,
+        category:              newForm.category,
       });
-      setNewForm({ site_name: '', username: '', password: '', category: 'General' });
+      
+      setNewForm({ site_name: '', username: '', password: '', totp_secret: '', category: 'General' });
       setCriteria({ length: false, uppercase: false, lowercase: false, number: false, special: false });
       setShowGenerator(false);
       setShowPassword(false);
       fetchPasswords();
-      toast.success("Credential securely encrypted & saved!", { icon: '🔐', style: { background: '#059669', color: '#fff' } });
+      toast.success("Credential & 2FA securely encrypted & saved!", { icon: '🔐', style: { background: '#059669', color: '#fff' } });
     } catch (err) {
       console.error("Save error:", err);
       toast.error("Failed to save credential.", { style: { background: '#1e293b', color: '#fff' } });
     }
   };
 
-  // Toast-based confirm instead of native window.confirm
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex items-center gap-3">
@@ -199,7 +219,6 @@ export default function Vault() {
     return matchesSearch && matchesCategory;
   });
 
-  // Scroll to form when EmptyVault CTA is clicked
   const scrollToForm = () => {
     document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -380,6 +399,20 @@ export default function Vault() {
 
               <StrengthBar criteria={criteria} />
 
+              {/* NEW: Optional 2FA Secret Input */}
+              <div className="mt-4 relative">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <Key size={16} className="text-emerald-500/50" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="2FA / TOTP Authenticator Secret (Optional)"
+                  value={newForm.totp_secret}
+                  onChange={e => setNewForm({ ...newForm, totp_secret: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-emerald-500/20 bg-emerald-950/20 text-emerald-400 placeholder-emerald-500/50 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono tracking-widest uppercase text-sm"
+                />
+              </div>
+
               {showGenerator && (
                 <div className="mt-4 p-5 bg-[#0B0F19]/80 rounded-2xl border border-emerald-500/20 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
                   <PasswordGenerator
@@ -391,20 +424,11 @@ export default function Vault() {
                   />
                 </div>
               )}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <CriteriaItem met={criteria.length}    text="8+ chars"  />
-                <CriteriaItem met={criteria.uppercase} text="Uppercase"  />
-                <CriteriaItem met={criteria.lowercase} text="Lowercase"  />
-                <CriteriaItem met={criteria.number}    text="Number"     />
-                <CriteriaItem met={criteria.special}   text="Symbol"     />
-              </div>
             </div>
 
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                // NEW LOGIC: Only disable if the password field is empty
                 disabled={newForm.password.length === 0}
                 className="w-full md:w-auto px-8 py-3.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -471,9 +495,10 @@ export default function Vault() {
                 site_name={p.site_name}
                 username={p.username}
                 password={p.password}
+                totp_secret={p.totp_secret} 
                 category={p.category}
-                onCopy={() => {
-                  navigator.clipboard.writeText(p.password);
+                onCopy={(pwd) => {
+                  navigator.clipboard.writeText(pwd);
                   toast.success("Password copied to clipboard", { icon: '📋', style: { background: '#1e293b', color: '#fff' } });
                 }}
                 onDelete={() => handleDelete(p.id)}
