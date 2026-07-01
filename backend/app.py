@@ -19,8 +19,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configure CORS
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
-
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://secure-vault-lake.vercel.app"]}}, supports_credentials=True)
     # Database Configuration (Using Docker-safe instance folder)
     os.makedirs(app.instance_path, exist_ok=True)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "app.db")}'
