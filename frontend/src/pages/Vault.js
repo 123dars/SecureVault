@@ -122,11 +122,14 @@ export default function Vault() {
       toast.error("Security session expired! Please click 'Lock Vault' and log in again.", { style: { background: '#1e293b', color: '#fff' } });
       return;
     }
-    const isStrong = Object.values(criteria).every(Boolean);
-    if (!isStrong) {
-      toast.error("Please meet all password strength requirements!", { style: { background: '#1e293b', color: '#fff' } });
+    
+    // NEW LOGIC: Only check if they actually typed a password.
+    // It doesn't matter if it's "weak" or just 4 numbers for a Bank PIN.
+    if (newForm.password.length === 0) {
+      toast.error("Please enter a password or PIN!", { style: { background: '#1e293b', color: '#fff' } });
       return;
     }
+
     try {
       const { ciphertext, iv } = encryptData(newForm.password, masterPassword);
       await api.post('/api/passwords', {
@@ -401,7 +404,8 @@ export default function Vault() {
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                disabled={!Object.values(criteria).every(Boolean)}
+                // NEW LOGIC: Only disable if the password field is empty
+                disabled={newForm.password.length === 0}
                 className="w-full md:w-auto px-8 py-3.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Encrypt & Save
