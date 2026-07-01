@@ -22,6 +22,15 @@ def add_password():
     try:
         binary_ciphertext = base64.b64decode(ciphertext)
         binary_iv = base64.b64decode(iv)
+        
+        # --- NEW: Process TOTP Secret safely ---
+        totp_secret_b64 = data.get('encrypted_totp_secret')
+        totp_iv_b64 = data.get('totp_iv')
+        
+        binary_totp_secret = base64.b64decode(totp_secret_b64) if totp_secret_b64 else None
+        binary_totp_iv = base64.b64decode(totp_iv_b64) if totp_iv_b64 else None
+        # ---------------------------------------
+
         safe_site_name = bleach.clean(data['site_name'])
         safe_username = bleach.clean(data.get('username', ''))
         safe_site_url = bleach.clean(data.get('site_url', ''))
@@ -33,6 +42,8 @@ def add_password():
             username=safe_username,
             encrypted_password=binary_ciphertext,
             iv=binary_iv,
+            encrypted_totp_secret=binary_totp_secret,
+            totp_iv=binary_totp_iv,
             category=data.get('category', 'General')
         )
         
@@ -56,6 +67,10 @@ def get_passwords():
             "username": p.username,
             "encrypted_password": base64.b64encode(p.encrypted_password).decode('utf-8'),
             "iv": base64.b64encode(p.iv).decode('utf-8'),
+            # --- NEW: Return encrypted TOTP fields ---
+            "encrypted_totp_secret": base64.b64encode(p.encrypted_totp_secret).decode('utf-8') if p.encrypted_totp_secret else None,
+            "totp_iv": base64.b64encode(p.totp_iv).decode('utf-8') if p.totp_iv else None,
+            # -----------------------------------------
             "category": p.category,
             "favorite": p.favorite
         })
