@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Copy, Trash2, Eye, EyeOff, Check, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle } from 'lucide-react';
 
 const CATEGORY_STYLES = {
   social:   { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/20'  },
@@ -26,9 +26,52 @@ function getStrength(pw = '') {
 export default function PasswordCard({ site_name, username, password, category = 'other', onCopy, onDelete }) {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // New States for Dark Web Breach Detection
+  const [isLeaked, setIsLeaked] = useState(false);
+  const [leakCount, setLeakCount] = useState(0);
 
   const cat = CATEGORY_STYLES[category?.toLowerCase()] ?? CATEGORY_STYLES.other;
   const strength = getStrength(password);
+
+  // The HaveIBeenPwned API check using k-Anonymity
+  useEffect(() => {
+    async function checkLeak() {
+      if (!password) return;
+      try {
+        // 1. Securely Hash the password using SHA-1 (Built-in Browser Crypto)
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        
+        // 2. Split the hash (k-anonymity)
+        const prefix = hashHex.slice(0, 5);
+        const suffix = hashHex.slice(5);
+
+        // 3. Send ONLY the 5-character prefix to the API
+        const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+        if (response.ok) {
+          const text = await response.text();
+          const lines = text.split('\n');
+          
+          // 4. Check if our exact suffix is in the leaked database
+          for (const line of lines) {
+            const [hashSuffix, count] = line.split(':');
+            if (hashSuffix.trim() === suffix) {
+              setIsLeaked(true);
+              setLeakCount(parseInt(count, 10));
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Leak check failed (maybe offline)", err);
+      }
+    }
+    checkLeak();
+  }, [password]);
 
   const handleCopy = () => {
     onCopy?.();
@@ -37,12 +80,22 @@ export default function PasswordCard({ site_name, username, password, category =
   };
 
   return (
-    <div className="group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border border-slate-700/50 shadow-xl hover:border-slate-600/60 transition-all duration-300">
+    <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
 
-      {/* Category badge */}
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${cat.bg} ${cat.text} ${cat.border}`}>
-        {category}
-      </span>
+      {/* Category badge & Breach Warning */}
+      <div className="flex justify-between items-start">
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${cat.bg} ${cat.text} ${cat.border}`}>
+          {category}
+        </span>
+        
+        {/* NEW: Flashing Red Breach Badge! */}
+        {isLeaked && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-full text-[10px] font-bold uppercase animate-pulse">
+            <AlertTriangle size={12} />
+            Leaked {leakCount.toLocaleString()} times
+          </span>
+        )}
+      </div>
 
       {/* Site + username */}
       <h3 className="mt-2.5 mb-0.5 text-base font-bold text-white truncate">{site_name}</h3>
@@ -52,8 +105,8 @@ export default function PasswordCard({ site_name, username, password, category =
       </p>
 
       {/* Password row */}
-      <div className="relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border border-slate-700/50 mb-3 flex items-center gap-2">
-        <span className={`flex-1 font-mono text-sm truncate ${showPassword ? 'text-emerald-400 tracking-wider' : 'text-slate-500 tracking-[4px]'}`}>
+      <div className={`relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-700/50'}`}>
+        <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 tracking-[4px]'}`}>
           {showPassword ? password : '••••••••••••'}
         </span>
         <button
