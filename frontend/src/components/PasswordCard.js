@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle, Clock } from 'lucide-react';
-import { authenticator } from 'otplib'; // NEW: Import the TOTP engine!
-
+import { generateTOTP, getTotpTimeLeft } from '../utils/totp';
 const CATEGORY_STYLES = {
   social:   { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/20'  },
   finance:  { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
