@@ -10,7 +10,7 @@ import SkeletonCard from '../components/SkeletonCard';
 import PasswordGenerator from '../components/PasswordGenerator';
 import toast from 'react-hot-toast';
 import {
-  CheckCircle2, Circle, Search, Filter, ShieldCheck,
+  Search, Filter, ShieldCheck,
   LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown, Key
 } from 'lucide-react';
 const CATEGORIES = ['General', 'Work', 'Finance', 'Social', 'Gaming', 'Shopping'];
@@ -178,16 +178,6 @@ export default function Vault() {
       </div>
     ), { style: { background: '#1e293b', color: '#fff' }, duration: 8000 });
   };
-  const CriteriaItem = ({ met, text }) => (
-    <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-      met
-        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'
-        : 'bg-slate-800/50 text-slate-500 border-slate-700/50'
-    }`}>
-      {met ? <CheckCircle2 size={13} /> : <Circle size={13} />}
-      {text}
-    </div>
-  );
   const filteredPasswords = passwords.filter(p => {
     const matchesSearch   = p.site_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (p.username && p.username.toLowerCase().includes(searchTerm.toLowerCase()));
