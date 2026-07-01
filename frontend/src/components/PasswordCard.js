@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle } from 'lucide-react';
+import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle, Clock } from 'lucide-react';
+import { authenticator } from 'otplib'; // NEW: Import the TOTP engine!
 
 const CATEGORY_STYLES = {
   social:   { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/20'  },
@@ -23,40 +24,64 @@ function getStrength(pw = '') {
   return              { label: 'Strong', filled: 4, color: 'bg-emerald-400'};
 }
 
-export default function PasswordCard({ site_name, username, password, category = 'other', onCopy, onDelete }) {
+export default function PasswordCard({ site_name, username, password, totp_secret, category = 'other', onCopy, onDelete }) {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // New States for Dark Web Breach Detection
+  // States for Dark Web Breach Detection
   const [isLeaked, setIsLeaked] = useState(false);
   const [leakCount, setLeakCount] = useState(0);
 
+  // States for Built-in 2FA (TOTP)
+  const [totpCode, setTotpCode] = useState('');
+  const [totpTimeLeft, setTotpTimeLeft] = useState(30);
+
   const cat = CATEGORY_STYLES[category?.toLowerCase()] ?? CATEGORY_STYLES.other;
   const strength = getStrength(password);
+
+  // --- LIVE 2FA TOTP GENERATOR ---
+  useEffect(() => {
+    if (!totp_secret) return;
+    
+    const updateTotp = () => {
+      try {
+        // Clean the secret by removing spaces (in case user pasted it weird)
+        const cleanSecret = totp_secret.replace(/\s+/g, '').toUpperCase();
+        const token = authenticator.generate(cleanSecret);
+        setTotpCode(token);
+        setTotpTimeLeft(authenticator.timeRemaining());
+      } catch (err) {
+        console.error("Invalid TOTP Secret", err);
+        setTotpCode("INVALID");
+      }
+    };
+    
+    updateTotp();
+    // Update the live timer every 1 second
+    const interval = setInterval(updateTotp, 1000);
+    return () => clearInterval(interval);
+  }, [totp_secret]);
+  // -------------------------------
 
   // The HaveIBeenPwned API check using k-Anonymity
   useEffect(() => {
     async function checkLeak() {
       if (!password) return;
       try {
-        // 1. Securely Hash the password using SHA-1 (Built-in Browser Crypto)
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-1', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
         
-        // 2. Split the hash (k-anonymity)
         const prefix = hashHex.slice(0, 5);
         const suffix = hashHex.slice(5);
 
-        // 3. Send ONLY the 5-character prefix to the API
         const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
         if (response.ok) {
           const text = await response.text();
           const lines = text.split('\n');
           
-          // 4. Check if our exact suffix is in the leaked database
           for (const line of lines) {
             const [hashSuffix, count] = line.split(':');
             if (hashSuffix.trim() === suffix) {
@@ -74,13 +99,18 @@ export default function PasswordCard({ site_name, username, password, category =
   }, [password]);
 
   const handleCopy = () => {
-    onCopy?.();
+    onCopy?.(password);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
 
+  const handleCopyTotp = () => {
+    if (!totpCode || totpCode === "INVALID") return;
+    navigator.clipboard.writeText(totpCode);
+  };
+
   return (
-    <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
+    <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 flex flex-col ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
 
       {/* Category badge & Breach Warning */}
       <div className="flex justify-between items-start">
@@ -88,7 +118,6 @@ export default function PasswordCard({ site_name, username, password, category =
           {category}
         </span>
         
-        {/* NEW: Flashing Red Breach Badge! */}
         {isLeaked && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-full text-[10px] font-bold uppercase animate-pulse">
             <AlertTriangle size={12} />
@@ -104,6 +133,27 @@ export default function PasswordCard({ site_name, username, password, category =
         {username || 'No username'}
       </p>
 
+      {/* NEW: 2FA LIVE TOTP ROW */}
+      {totp_secret && (
+        <div className="relative bg-emerald-950/30 px-3 py-2.5 rounded-xl border border-emerald-500/30 mb-3 flex items-center gap-3">
+          <span className="flex-1 font-mono text-xl font-bold text-emerald-400 tracking-[0.2em]">
+            {totpCode ? `${totpCode.slice(0,3)} ${totpCode.slice(3)}` : '------'}
+          </span>
+          <div className="flex flex-col items-end shrink-0 gap-1">
+            <span className={`text-[10px] font-bold flex items-center gap-1 ${totpTimeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-emerald-500/70'}`}>
+              <Clock size={10} /> {totpTimeLeft}s
+            </span>
+            <button
+              onClick={handleCopyTotp}
+              className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-xs font-bold hover:bg-emerald-500 hover:text-white transition-colors"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      )}
+      {/* ------------------------ */}
+
       {/* Password row */}
       <div className={`relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-700/50'}`}>
         <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 tracking-[4px]'}`}>
@@ -118,8 +168,10 @@ export default function PasswordCard({ site_name, username, password, category =
         </button>
       </div>
 
+      <div className="flex-grow"></div>
+
       {/* Strength meter */}
-      <div className="mb-4">
+      <div className="mb-4 mt-auto">
         <p className="text-[10px] text-slate-500 mb-1.5">
           Strength: <span className={`font-semibold ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
         </p>
@@ -143,7 +195,7 @@ export default function PasswordCard({ site_name, username, password, category =
               : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-emerald-600 hover:border-emerald-500 hover:text-white'}`}
         >
           {copied ? <Check size={15} className="animate-bounce-once" /> : <Copy size={15} />}
-          {copied ? 'Copied!' : 'Copy password'}
+          {copied ? 'Copied!' : 'Copy'}
         </button>
 
         <button
