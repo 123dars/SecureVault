@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import { useTheme } from '../ThemeContext';
 import api from '../api';
 import { encryptData, decryptData } from '../crypto';
 import NoteCard from '../components/NoteCard';
 import toast from 'react-hot-toast';
 import {
-  Search, ShieldAlert, LogOut, Plus, ShieldCheck
+  Search, ShieldAlert, LogOut, Plus, ShieldCheck,
+  Moon, Sun
 } from 'lucide-react';
 const COLORS = [
   { name: 'slate',   bg: 'bg-slate-500' },
@@ -18,6 +20,7 @@ const COLORS = [
 ];
 export default function Notes() {
   const { logout } = useContext(AuthContext);
+  const { theme, toggleTheme } = useTheme();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +28,7 @@ export default function Notes() {
   const [newForm, setNewForm] = useState({ title: '', content: '', color: 'slate' });
   const [sessionWarning, setSessionWarning] = useState(false);
   const masterPassword = sessionStorage.getItem('masterPassword');
+  
   const fetchNotes = useCallback(async () => {
     try {
       const res = await api.get('/api/notes');
@@ -77,7 +81,7 @@ export default function Notes() {
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-white">Destroy this note?</span>
+        <span className="text-sm font-medium text-slate-900 dark:text-white">Destroy this note?</span>
         <button
           onClick={async () => {
             toast.dismiss(t.id);
@@ -89,13 +93,13 @@ export default function Notes() {
               toast.error("Failed to delete note.", { style: { background: '#1e293b', color: '#fff' } });
             }
           }}
-          className="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-500 transition-colors"
+          className="px-3 py-1 bg-rose-600 text-slate-900 dark:text-white text-xs font-bold rounded-lg hover:bg-rose-500 transition-colors"
         >
           Delete
         </button>
         <button
           onClick={() => toast.dismiss(t.id)}
-          className="px-3 py-1 bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-600 transition-colors"
+          className="px-3 py-1 bg-slate-700 text-slate-900 dark:text-white text-xs font-bold rounded-lg hover:bg-slate-600 transition-colors"
         >
           Cancel
         </button>
@@ -107,7 +111,7 @@ export default function Notes() {
     n.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
   return (
-    <div className="min-h-screen bg-[#0B0F19] font-sans selection:bg-emerald-500/30 pb-20 relative animate-in fade-in duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] font-sans selection:bg-emerald-500/30 pb-20 relative animate-in fade-in duration-300">
       <div
         className="fixed inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none z-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop')" }}
@@ -122,12 +126,12 @@ export default function Notes() {
           </button>
         </div>
       )}
-      <nav className="sticky top-0 z-50 bg-[#111827]/80 backdrop-blur-xl border-b border-slate-800/60 shadow-lg shadow-black/50">
+      <nav className="sticky top-0 z-50 bg-white dark:bg-[#111827]/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/60 shadow-lg shadow-black/50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/50 border border-emerald-400/20">
-                <ShieldCheck className="text-white drop-shadow-md" size={22} strokeWidth={2.5} />
+                <ShieldCheck className="text-slate-900 dark:text-white drop-shadow-md" size={22} strokeWidth={2.5} />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight leading-none">
@@ -136,8 +140,8 @@ export default function Notes() {
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mt-0.5">Zero-Knowledge</p>
               </div>
             </div>
-            <div className="hidden md:flex bg-slate-900/50 p-1 rounded-xl border border-slate-700/50">
-              <Link to="/vault" className="px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-colors">
+            <div className="hidden md:flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-xl border border-slate-200 dark:border-slate-700/50">
+              <Link to="/vault" className="px-4 py-2 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">
                 Passwords
               </Link>
               <Link to="/notes" className="px-4 py-2 rounded-lg text-sm font-bold bg-emerald-500/20 text-emerald-400 shadow-sm border border-emerald-500/30">
@@ -147,7 +151,15 @@ export default function Notes() {
           </div>
           
           <div className="flex items-center gap-4">
-            <button onClick={logout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all border border-transparent hover:border-rose-500/20">
+            
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-emerald-500 transition-colors bg-slate-100 dark:bg-slate-800 rounded-lg hidden sm:block border border-slate-200 dark:border-slate-700"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button onClick={logout}
+ className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all border border-transparent hover:border-rose-500/20">
               <LogOut size={16} /> Lock Vault
             </button>
           </div>
@@ -155,17 +167,17 @@ export default function Notes() {
       </nav>
       <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
         <div className="mb-10 text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-3">Private Text Vault</h2>
-          <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3">Private Text Vault</h2>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
             Encrypt and save your most sensitive text documents here. Bank routing numbers, secret keys, or private diaries—only you can read them.
           </p>
         </div>
-        <div className="bg-[#111827]/60 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl mb-12">
+        <div className="bg-white dark:bg-[#111827]/60 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-700/50 shadow-2xl mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
               <Plus className="text-emerald-400" size={16} />
             </div>
-            <h3 className="text-xl font-bold text-white">Encrypt New Note</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Encrypt New Note</h3>
           </div>
           
           <form onSubmit={handleAdd} className="space-y-5">
@@ -174,14 +186,14 @@ export default function Notes() {
                 <input
                   type="text"
                   placeholder="Note Title (e.g., Bank Account Details)"
-                  className="w-full px-5 py-3.5 rounded-xl border border-slate-700/50 bg-[#0B0F19]/50 text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
+                  className="w-full px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-[#0B0F19]/50 text-slate-900 dark:text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
                   value={newForm.title}
                   onChange={e => setNewForm({ ...newForm, title: e.target.value })}
                   required
                 />
               </div>
-              <div className="flex items-center gap-2 bg-[#0B0F19]/50 px-4 py-2 rounded-xl border border-slate-700/50">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Color</span>
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#0B0F19]/50 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700/50">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mr-2">Color</span>
                 {COLORS.map(c => (
                   <button
                     key={c.name}
@@ -196,7 +208,7 @@ export default function Notes() {
               <textarea
                 placeholder="Write your secret note here... It will be encrypted locally using AES-GCM before it ever leaves your device."
                 rows="6"
-                className="w-full px-5 py-4 rounded-xl border border-emerald-500/30 bg-[#0B0F19]/80 text-emerald-400 placeholder-emerald-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono text-sm resize-y"
+                className="w-full px-5 py-4 rounded-xl border border-emerald-500/30 bg-slate-50 dark:bg-[#0B0F19]/80 text-emerald-400 placeholder-emerald-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono text-sm resize-y"
                 value={newForm.content}
                 onChange={e => setNewForm({ ...newForm, content: e.target.value })}
                 required
@@ -206,7 +218,7 @@ export default function Notes() {
               <button
                 type="submit"
                 disabled={newForm.content.trim().length === 0 || newForm.title.length === 0}
-                className="w-full md:w-auto px-8 py-3.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full md:w-auto px-8 py-3.5 bg-emerald-600 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Encrypt & Save Note
               </button>
@@ -214,19 +226,19 @@ export default function Notes() {
           </form>
         </div>
         <div className="mb-8 relative max-w-xl mx-auto">
-          <Search className="absolute left-4 top-4 text-slate-500" size={20} />
+          <Search className="absolute left-4 top-4 text-slate-500 dark:text-slate-500" size={20} />
           <input
             type="text"
             placeholder="Search decrypted notes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-700/50 bg-[#111827]/80 backdrop-blur-md text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all shadow-lg"
+            className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-[#111827]/80 backdrop-blur-md text-slate-900 dark:text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all shadow-lg"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1, 2, 3].map(n => (
-              <div key={n} className="h-64 bg-[#111827]/40 rounded-3xl border border-slate-800 animate-pulse" />
+              <div key={n} className="h-64 bg-white dark:bg-[#111827]/40 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse" />
             ))
           ) : filteredNotes.length > 0 ? (
             filteredNotes.map(n => (
@@ -243,8 +255,8 @@ export default function Notes() {
               />
             ))
           ) : (
-            <div className="col-span-full text-center py-20 bg-[#111827]/40 rounded-3xl border border-slate-800 border-dashed">
-              <p className="text-slate-500 font-bold text-lg mb-2">No notes found.</p>
+            <div className="col-span-full text-center py-20 bg-white dark:bg-[#111827]/40 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed">
+              <p className="text-slate-500 dark:text-slate-500 font-bold text-lg mb-2">No notes found.</p>
               <p className="text-slate-600 text-sm">Your private text vault is empty.</p>
             </div>
           )}
