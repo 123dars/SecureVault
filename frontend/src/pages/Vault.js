@@ -11,7 +11,7 @@ import PasswordGenerator from '../components/PasswordGenerator';
 import toast from 'react-hot-toast';
 import {
   Search, Filter, ShieldCheck,
-  LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown, Key
+  LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown
 } from 'lucide-react';
 const CATEGORIES = ['General', 'Work', 'Finance', 'Social', 'Gaming', 'Shopping'];
 const CATEGORY_COLORS = {
