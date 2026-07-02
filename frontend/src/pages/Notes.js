@@ -17,7 +17,7 @@ const COLORS = [
   { name: 'amber',   bg: 'bg-amber-500' },
 ];
 export default function Notes() {
-  const { user, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
