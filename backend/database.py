@@ -22,7 +22,17 @@ class Password(db.Model):
     iv = db.Column(db.LargeBinary, nullable=False)
     category = db.Column(db.String(50), default='General')
     
-    # NEW: TOTP Columns for the 2FA Authenticator Feature
     encrypted_totp_secret = db.Column(db.LargeBinary, nullable=True)
     totp_iv = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class Note(db.Model):
+    __tablename__ = 'notes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    encrypted_content = db.Column(db.LargeBinary, nullable=False)
+    iv = db.Column(db.LargeBinary, nullable=False)
+    color = db.Column(db.String(50), default='slate')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
