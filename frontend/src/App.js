@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, AuthContext } from './AuthContext';
 import { ThemeProvider } from './ThemeContext';
 import { Toaster } from 'react-hot-toast'; 
+
 // Import Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,6 +12,7 @@ import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import MfaSetup from './pages/MfaSetup'; 
 import ForgotPassword from './pages/ForgotPassword'; 
+
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
   if (!user) {
@@ -18,6 +20,7 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
+
 function App() {
   return (
     <ThemeProvider>
@@ -29,6 +32,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} /> 
+
             <Route 
               path="/mfa-setup" 
               element={
@@ -61,6 +65,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
             <Route path="*" element={<Navigate to="/vault" />} />
           </Routes>
         </Router>
@@ -68,4 +73,5 @@ function App() {
     </ThemeProvider>
   );
 }
+
 export default App;
