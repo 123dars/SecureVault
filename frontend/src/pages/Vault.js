@@ -51,6 +51,7 @@ function PasswordCriteria({ criteria }) {
 }
 export default function Vault() {
   const { user, logout } = useContext(AuthContext);
+  
   const [passwords,       setPasswords]       = useState([]);
   const [loading,         setLoading]         = useState(true);
   const [searchTerm,      setSearchTerm]      = useState('');
@@ -95,6 +96,7 @@ export default function Vault() {
   const handlePasswordChange = (e) => {
     const val = e.target.value;
     setNewForm({ ...newForm, password: val });
+    
     setCriteria({
       length:    val.length >= 8,
       uppercase: /[A-Z]/.test(val),
@@ -180,6 +182,7 @@ export default function Vault() {
   };
   return (
     <div className="min-h-screen bg-[#0B0F19] font-sans selection:bg-emerald-500/30 pb-20 relative animate-in fade-in duration-300">
+      
       <div
         className="fixed inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity pointer-events-none z-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop')" }}
@@ -199,16 +202,27 @@ export default function Vault() {
       )}
       <nav className="sticky top-0 z-50 bg-[#111827]/80 backdrop-blur-xl border-b border-slate-800/60 shadow-lg shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-              <ShieldCheck size={24} className="text-emerald-500" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              SecureVault
-              <span className="text-slate-500 font-normal text-sm ml-2 hidden sm:inline-block">
-                | Connected as <span className="text-emerald-400">{user?.username}</span>
+          
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                <ShieldCheck size={24} className="text-emerald-500" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-white">
+                SecureVault
+                <span className="text-slate-500 font-normal text-sm ml-2 hidden sm:inline-block">
+                  | Connected as <span className="text-emerald-400">{user?.username}</span>
+                </span>
               </span>
-            </span>
+            </div>
+            <div className="hidden md:flex bg-slate-900/50 p-1 rounded-xl border border-slate-700/50">
+              <Link to="/vault" className="px-4 py-2 rounded-lg text-sm font-bold bg-emerald-500/20 text-emerald-400 shadow-sm border border-emerald-500/30">
+                Passwords
+              </Link>
+              <Link to="/notes" className="px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                Secure Notes
+              </Link>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <Link
@@ -227,6 +241,7 @@ export default function Vault() {
         </div>
       </nav>
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        
         {!loading && passwords.length > 0 && (
           <div className="bg-[#111827]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
@@ -264,6 +279,7 @@ export default function Vault() {
             <span className="bg-emerald-500/20 text-emerald-500 w-8 h-8 flex items-center justify-center rounded-full text-sm border border-emerald-500/30">+</span>
             Encrypt New Credential
           </h2>
+          
           <form onSubmit={handleAdd} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
@@ -295,6 +311,7 @@ export default function Vault() {
                 <ChevronDown size={16} className="absolute right-3.5 top-4 text-slate-500 pointer-events-none" />
               </div>
             </div>
+            
             <div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
@@ -339,6 +356,7 @@ export default function Vault() {
                 </button>
               </div>
               <PasswordCriteria criteria={criteria} />
+              
               {showGenerator && (
                 <div className="mt-4 p-5 bg-[#0B0F19]/80 rounded-2xl border border-emerald-500/20 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
                   <PasswordGenerator
@@ -351,6 +369,7 @@ export default function Vault() {
                 </div>
               )}
             </div>
+            
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
@@ -373,6 +392,7 @@ export default function Vault() {
               className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-700/50 bg-[#0B0F19]/50 text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
             />
           </div>
+          
           <div className="flex items-center gap-3 w-full md:w-auto">
             <Filter className="text-slate-500 hidden md:block" size={20} />
             <div
