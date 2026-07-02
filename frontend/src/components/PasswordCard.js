@@ -5,7 +5,7 @@ const CATEGORY_STYLES = {
   finance:  { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
   work:     { bg: 'bg-sky-500/10',     text: 'text-sky-400',     border: 'border-sky-500/20'     },
   shopping: { bg: 'bg-amber-500/10',   text: 'text-amber-400',   border: 'border-amber-500/20'   },
-  other:    { bg: 'bg-slate-700/50',   text: 'text-slate-400',   border: 'border-slate-600/30'   },
+  other:    { bg: 'bg-slate-700/50',   text: 'text-slate-600 dark:text-slate-400',   border: 'border-slate-600/30'   },
 };
 function getStrength(pw = '') {
   let score = 0;
@@ -65,7 +65,7 @@ export default function PasswordCard({ site_name, username, password, category =
     setTimeout(() => setCopied(false), 1800);
   };
   return (
-    <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 flex flex-col ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
+    <div className={`group relative bg-white dark:bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 flex flex-col ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-200 dark:border-slate-700/50 hover:border-slate-600/60'}`}>
       <div className="flex justify-between items-start">
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${cat.bg} ${cat.text} ${cat.border}`}>
           {category}
@@ -78,25 +78,25 @@ export default function PasswordCard({ site_name, username, password, category =
           </span>
         )}
       </div>
-      <h3 className="mt-2.5 mb-0.5 text-base font-bold text-white truncate">{site_name}</h3>
-      <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-4 truncate">
+      <h3 className="mt-2.5 mb-0.5 text-base font-bold text-slate-900 dark:text-white truncate">{site_name}</h3>
+      <p className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 mb-4 truncate">
         <User size={11} className="shrink-0" />
         {username || 'No username'}
       </p>
-      <div className={`relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-700/50'}`}>
-        <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 tracking-[4px]'}`}>
+      <div className={`relative bg-slate-50 dark:bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-200 dark:border-slate-700/50'}`}>
+        <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 dark:text-slate-500 tracking-[4px]'}`}>
           {showPassword ? password : '••••••••••••'}
         </span>
         <button
           onClick={() => setShowPassword(v => !v)}
-          className="shrink-0 text-slate-500 hover:text-slate-300 transition-colors"
+          className="shrink-0 text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-colors"
         >
           {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       </div>
       <div className="flex-grow"></div>
       <div className="mb-4 mt-auto">
-        <p className="text-[10px] text-slate-500 mb-1.5">
+        <p className="text-[10px] text-slate-500 dark:text-slate-500 mb-1.5">
           Strength: <span className={`font-semibold ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
         </p>
         <div className="flex gap-1">
@@ -114,14 +114,14 @@ export default function PasswordCard({ site_name, username, password, category =
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200
             ${copied
               ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 scale-[0.98]'
-              : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-emerald-600 hover:border-emerald-500 hover:text-white'}`}
+              : 'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-600 hover:border-emerald-500 hover:text-slate-900 dark:text-white'}`}
         >
           {copied ? <Check size={15} className="animate-bounce-once" /> : <Copy size={15} />}
           {copied ? 'Copied!' : 'Copy'}
         </button>
         <button
           onClick={onDelete}
-          className="p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all duration-200"
+          className="p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-600 hover:text-slate-900 dark:text-white hover:border-rose-500 transition-all duration-200"
         >
           <Trash2 size={15} />
         </button>
