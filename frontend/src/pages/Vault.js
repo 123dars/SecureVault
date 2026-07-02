@@ -52,7 +52,7 @@ function PasswordCriteria({ criteria }) {
   );
 }
 export default function Vault() {
-  const { user, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
   const [passwords,       setPasswords]       = useState([]);
   const [loading,         setLoading]         = useState(true);
