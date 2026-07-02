@@ -30,53 +30,54 @@ export default function Login() {
         setShowMfaInput(true);
       } else {
         login(password, res.data); 
-        toast.success("Welcome back!", { style: { background: '#1e293b', color: '#fff' }});
+        toast.success("Welcome back!", { icon: '👋' });
         navigate('/vault');
       }
     } catch (err) {
       console.error("Login error:", err);
       if (showMfaInput) setMfaCode(''); 
-      toast.error(err.response?.data?.error || "Invalid credentials", { style: { background: '#1e293b', color: '#fff' }});
+      toast.error(err.response?.data?.error || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex relative font-sans selection:bg-emerald-500/30 bg-[#0B0F19] overflow-hidden">
+    <div className="min-h-screen flex relative font-sans selection:bg-indigo-500/30 bg-slate-50 dark:bg-[#09090b] overflow-hidden">
       
       {/* Full Screen Matrix Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity pointer-events-none"
+        className="absolute inset-0 bg-cover bg-center opacity-[0.03] dark:opacity-[0.05] mix-blend-luminosity pointer-events-none z-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop')" }}
-      ></div>
-      {/* Dark Emerald Glass Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0B0F19]/95 via-[#0B0F19]/80 to-emerald-950/60 pointer-events-none"></div>
+      />
+      {/* Dynamic Gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#09090b]/95 via-[#09090b]/90 to-indigo-950/20 pointer-events-none z-0 hidden dark:block" />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50/90 via-white/80 to-indigo-50/50 pointer-events-none z-0 dark:hidden" />
 
       {/* Main Content Layout */}
       <div className="relative z-10 flex w-full max-w-7xl mx-auto">
         
         {/* LEFT SIDE: Image & Branding */}
-        <div className="hidden lg:flex w-1/2 flex-col justify-center items-center p-12">
-          <div className="relative w-full max-w-md aspect-square rounded-3xl flex items-center justify-center mb-10">
+        <div className="hidden lg:flex w-1/2 flex-col justify-center items-center p-12 animate-in fade-in slide-in-from-left-8 duration-700">
+          <div className="relative w-full max-w-md aspect-square rounded-[2.5rem] flex items-center justify-center mb-10 group">
             {/* Glowing orb effect behind image */}
-            <div className="absolute inset-0 bg-emerald-500/20 blur-[80px] rounded-full"></div>
+            <div className="absolute inset-0 bg-indigo-500/20 dark:bg-indigo-500/30 blur-[80px] rounded-full group-hover:bg-indigo-500/40 transition-all duration-700"></div>
             {/* High-end Abstract Cyber Image */}
             <img 
               src="https://images.unsplash.com/photo-1618042164219-62c820f10723?q=80&w=2000&auto=format&fit=crop" 
               alt="Encrypted Vault" 
-              className="relative z-10 w-full h-full object-cover rounded-3xl border border-slate-700/50 shadow-2xl shadow-black/80"
+              className="relative z-10 w-full h-full object-cover rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-indigo-900/20"
             />
           </div>
           
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="bg-emerald-500 p-2.5 rounded-xl shadow-lg shadow-emerald-900/50">
-                <ShieldCheck size={28} className="text-[#0B0F19]" strokeWidth={2.5} />
+            <div className="inline-flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-900/30 border border-indigo-400/20">
+                <ShieldCheck size={28} className="text-white drop-shadow-md" strokeWidth={2.5} />
               </div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white">SecureVault</h1>
+              <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 tracking-tight">SecureVault</h1>
             </div>
-            <p className="text-slate-400 text-lg font-medium max-w-sm mx-auto">
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium max-w-sm mx-auto">
               Military-grade local encryption for your digital identity.
             </p>
           </div>
@@ -84,54 +85,54 @@ export default function Login() {
 
         {/* RIGHT SIDE: The Form Card */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
-          <div className="w-full max-w-md bg-[#111827]/90 backdrop-blur-xl p-8 md:p-10 rounded-3xl border border-slate-700/50 shadow-2xl shadow-black transition-all duration-500">
+          <div className="w-full max-w-md bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-2xl p-8 md:p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-right-8 duration-700">
             
             {!showMfaInput ? (
               <div className="animate-in fade-in zoom-in-95 duration-300">
                 <div className="text-center mb-10">
-                  <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-                  <p className="text-slate-400 text-sm">Decrypt your zero-knowledge vault</p>
+                  <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">Welcome Back</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Decrypt your zero-knowledge vault</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <User className="text-slate-500" size={18} />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                      <User className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                     </div>
                     <input 
                       type="text" 
                       value={username} 
                       onChange={(e) => setUsername(e.target.value)} 
                       required 
-                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-700/50 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-[#0B0F19]/50 text-white placeholder-slate-600"
+                      className="w-full pl-14 pr-5 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-inner"
                       placeholder="Username"
                     />
                   </div>
                   
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="text-slate-500" size={18} />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                      <Lock className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                     </div>
                     <input 
                       type={showPassword ? "text" : "password"} 
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       required 
-                      className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-700/50 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-[#0B0F19]/50 text-white font-mono placeholder-slate-600"
+                      className="w-full pl-14 pr-14 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all bg-slate-50 dark:bg-[#09090b] text-indigo-600 dark:text-indigo-400 font-mono tracking-wider placeholder-slate-400 dark:placeholder-slate-500 shadow-inner"
                       placeholder="Master Password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-4 text-slate-500 hover:text-slate-300 transition-colors"
+                      className="absolute right-5 top-4.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors bg-white dark:bg-[#18181b] p-1 rounded-md shadow-sm border border-slate-200 dark:border-slate-800"
                       tabIndex="-1"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
 
                   <div className="flex justify-end mt-2 px-1">
-                    <Link to="/forgot-password" className="text-xs font-semibold text-emerald-500 hover:text-emerald-400 transition-colors">
+                    <Link to="/forgot-password" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
                       Forgot Password?
                     </Link>
                   </div>
@@ -139,9 +140,9 @@ export default function Login() {
                   <button 
                     type="submit" 
                     disabled={loading} 
-                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-500 transition-all disabled:opacity-70 mt-4 shadow-lg shadow-emerald-900/20"
+                    className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-70 mt-6 shadow-lg shadow-indigo-600/30 active:scale-[0.98]"
                   >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Login'}
+                    {loading ? <Loader2 className="animate-spin" size={22} /> : 'Decrypt & Login'}
                   </button>
                 </form>
               </div>
@@ -149,17 +150,17 @@ export default function Login() {
               <div className="animate-in fade-in slide-in-from-right-8 duration-300">
                 <button 
                   onClick={() => { setShowMfaInput(false); setMfaCode(''); }}
-                  className="text-slate-400 hover:text-white mb-8 flex items-center gap-2 text-sm font-semibold transition-colors"
+                  className="text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 mb-8 flex items-center gap-2 text-sm font-bold transition-colors px-3 py-1.5 rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 >
                   <ArrowLeft size={16} /> Cancel
                 </button>
 
                 <div className="mb-8 text-center">
-                  <div className="w-16 h-16 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-center justify-center mx-auto mb-6 shadow-inner">
-                    <Smartphone size={32} className="text-amber-500" />
+                  <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <Smartphone size={32} className="text-indigo-600 dark:text-indigo-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Two-Factor Auth</h2>
-                  <p className="text-slate-400 text-sm">Enter the 6-digit code from your authenticator device.</p>
+                  <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Two-Factor Auth</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Enter the 6-digit code from your authenticator device.</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -172,23 +173,23 @@ export default function Login() {
                       onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))} 
                       required 
                       autoFocus
-                      className="w-full p-4 rounded-xl border border-slate-700/50 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all bg-[#0B0F19]/50 text-amber-400 placeholder-slate-700 text-center text-3xl tracking-[0.5em] font-mono"
+                      className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all bg-slate-50 dark:bg-[#09090b] text-indigo-600 dark:text-indigo-400 placeholder-slate-300 dark:placeholder-slate-700 text-center text-4xl tracking-[0.5em] font-mono shadow-inner"
                     />
                   </div>
 
                   <button 
                     type="submit" 
                     disabled={loading || mfaCode.length !== 6} 
-                    className="w-full flex items-center justify-center gap-2 bg-amber-600 text-white py-3.5 rounded-xl font-bold hover:bg-amber-500 transition-all disabled:opacity-70 shadow-lg shadow-amber-900/20"
+                    className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-70 shadow-lg shadow-indigo-600/30 active:scale-[0.98]"
                   >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Verify Identity'}
+                    {loading ? <Loader2 className="animate-spin" size={22} /> : 'Verify Identity'}
                   </button>
                 </form>
               </div>
             )}
             
-            <div className="mt-8 text-center text-sm text-slate-500 font-medium pt-6 border-t border-slate-700/50">
-              Don't have an account? <Link to="/register" className="text-emerald-500 font-bold hover:text-emerald-400 transition-colors">Register here</Link>
+            <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 font-medium pt-6 border-t border-slate-200 dark:border-slate-800">
+              Don't have an account? <Link to="/register" className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">Register here</Link>
             </div>
           </div>
         </div>
