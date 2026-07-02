@@ -2,7 +2,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: 'class', // <--- IMPORTANT: THIS IS WHAT ENABLES DARK/LIGHT MODE CLASSES
+  darkMode: 'class',
   theme: {
     extend: {
       keyframes: {
