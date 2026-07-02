@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle, Clock } from 'lucide-react';
-import { generateTOTP, getTotpTimeLeft } from '../utils/totp';
-
+import { Copy, Trash2, Eye, EyeOff, Check, User, AlertTriangle } from 'lucide-react';
 const CATEGORY_STYLES = {
   social:   { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/20'  },
   finance:  { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
@@ -9,7 +7,6 @@ const CATEGORY_STYLES = {
   shopping: { bg: 'bg-amber-500/10',   text: 'text-amber-400',   border: 'border-amber-500/20'   },
   other:    { bg: 'bg-slate-700/50',   text: 'text-slate-400',   border: 'border-slate-600/30'   },
 };
-
 function getStrength(pw = '') {
   let score = 0;
   if (pw.length >= 8)  score++;
@@ -17,41 +14,19 @@ function getStrength(pw = '') {
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
   if (/\d/.test(pw))   score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
-
   if (score <= 1) return { label: 'Weak',   filled: 1, color: 'bg-rose-500'   };
   if (score === 2) return { label: 'Fair',   filled: 2, color: 'bg-amber-400'  };
   if (score === 3) return { label: 'Good',   filled: 3, color: 'bg-emerald-400'};
   return              { label: 'Strong', filled: 4, color: 'bg-emerald-400'};
 }
-
-export default function PasswordCard({ site_name, username, password, totp_secret, category = 'other', onCopy, onDelete }) {
+export default function PasswordCard({ site_name, username, password, category = 'other', onCopy, onDelete }) {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
   
   const [isLeaked, setIsLeaked] = useState(false);
   const [leakCount, setLeakCount] = useState(0);
-
-  const [totpCode, setTotpCode] = useState('');
-  const [totpTimeLeft, setTotpTimeLeft] = useState(30);
-
   const cat = CATEGORY_STYLES[category?.toLowerCase()] ?? CATEGORY_STYLES.other;
   const strength = getStrength(password);
-
-  useEffect(() => {
-    if (!totp_secret) return;
-    
-    const updateTotp = () => {
-      if (!totp_secret) return;
-      const token = generateTOTP(totp_secret);
-      setTotpCode(token);
-      setTotpTimeLeft(getTotpTimeLeft());
-    };
-    
-    updateTotp();
-    const interval = setInterval(updateTotp, 1000);
-    return () => clearInterval(interval);
-  }, [totp_secret]);
-
   useEffect(() => {
     async function checkLeak() {
       if (!password) return;
@@ -64,7 +39,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
         
         const prefix = hashHex.slice(0, 5);
         const suffix = hashHex.slice(5);
-
         const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
         if (response.ok) {
           const text = await response.text();
@@ -85,21 +59,13 @@ export default function PasswordCard({ site_name, username, password, totp_secre
     }
     checkLeak();
   }, [password]);
-
   const handleCopy = () => {
     onCopy?.(password);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
-
-  const handleCopyTotp = () => {
-    if (!totpCode || totpCode === "INVALID") return;
-    navigator.clipboard.writeText(totpCode);
-  };
-
   return (
     <div className={`group relative bg-[#111827]/60 backdrop-blur-md p-5 rounded-3xl border shadow-xl transition-all duration-300 flex flex-col ${isLeaked ? 'border-rose-500/50 shadow-rose-900/20' : 'border-slate-700/50 hover:border-slate-600/60'}`}>
-
       <div className="flex justify-between items-start">
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${cat.bg} ${cat.text} ${cat.border}`}>
           {category}
@@ -112,32 +78,11 @@ export default function PasswordCard({ site_name, username, password, totp_secre
           </span>
         )}
       </div>
-
       <h3 className="mt-2.5 mb-0.5 text-base font-bold text-white truncate">{site_name}</h3>
       <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-4 truncate">
         <User size={11} className="shrink-0" />
         {username || 'No username'}
       </p>
-
-      {totp_secret && (
-        <div className="relative bg-emerald-950/30 px-3 py-2.5 rounded-xl border border-emerald-500/30 mb-3 flex items-center gap-3">
-          <span className="flex-1 font-mono text-xl font-bold text-emerald-400 tracking-[0.2em]">
-            {totpCode ? `${totpCode.slice(0,3)} ${totpCode.slice(3)}` : '------'}
-          </span>
-          <div className="flex flex-col items-end shrink-0 gap-1">
-            <span className={`text-[10px] font-bold flex items-center gap-1 ${totpTimeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-emerald-500/70'}`}>
-              <Clock size={10} /> {totpTimeLeft}s
-            </span>
-            <button
-              onClick={handleCopyTotp}
-              className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-xs font-bold hover:bg-emerald-500 hover:text-white transition-colors"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className={`relative bg-[#0B0F19]/70 px-3 py-2.5 rounded-xl border flex items-center gap-2 mb-3 ${isLeaked ? 'border-rose-500/30' : 'border-slate-700/50'}`}>
         <span className={`flex-1 font-mono text-sm truncate ${showPassword ? (isLeaked ? 'text-rose-400' : 'text-emerald-400') : 'text-slate-500 tracking-[4px]'}`}>
           {showPassword ? password : '••••••••••••'}
@@ -149,9 +94,7 @@ export default function PasswordCard({ site_name, username, password, totp_secre
           {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       </div>
-
       <div className="flex-grow"></div>
-
       <div className="mb-4 mt-auto">
         <p className="text-[10px] text-slate-500 mb-1.5">
           Strength: <span className={`font-semibold ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
@@ -165,7 +108,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
           ))}
         </div>
       </div>
-
       <div className="flex gap-2">
         <button
           onClick={handleCopy}
@@ -177,7 +119,6 @@ export default function PasswordCard({ site_name, username, password, totp_secre
           {copied ? <Check size={15} className="animate-bounce-once" /> : <Copy size={15} />}
           {copied ? 'Copied!' : 'Copy'}
         </button>
-
         <button
           onClick={onDelete}
           className="p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all duration-200"
