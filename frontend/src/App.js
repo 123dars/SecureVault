@@ -2,15 +2,14 @@ import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './AuthContext';
 import { Toaster } from 'react-hot-toast'; 
-
 // Import Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Vault from './pages/Vault';
+import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import MfaSetup from './pages/MfaSetup'; 
-import ForgotPassword from './pages/ForgotPassword'; // <--- Make sure this exists
-
+import ForgotPassword from './pages/ForgotPassword'; 
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
   if (!user) {
@@ -18,7 +17,6 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
-
 function App() {
   return (
     <AuthProvider>
@@ -26,12 +24,9 @@ function App() {
         <Toaster position="bottom-right" reverseOrder={false} />
         
         <Routes>
-          {/* Public Routes - Note: ForgotPassword is NOT protected */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} /> 
-
-          {/* Protected Routes */}
           <Route 
             path="/mfa-setup" 
             element={
@@ -49,6 +44,14 @@ function App() {
             } 
           />
           <Route 
+            path="/notes" 
+            element={
+              <ProtectedRoute>
+                <Notes />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/settings" 
             element={
               <ProtectedRoute>
@@ -56,13 +59,10 @@ function App() {
               </ProtectedRoute>
             } 
           />
-
-          {/* Default Route - Redirects logged-in users to vault, others to login */}
           <Route path="*" element={<Navigate to="/vault" />} />
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
-
 export default App;
