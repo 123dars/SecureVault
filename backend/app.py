@@ -7,12 +7,12 @@ from flask_cors import CORS
 from extensions import db, limiter
 from routes.auth import auth_bp
 from routes.passwords import passwords_bp
+from routes.notes import notes_bp
 from routes.mfa import mfa_bp
 load_dotenv()
 def create_app():
     app = Flask(__name__)
     
-    # Configure CORS - Make sure you include your frontend URLs
     CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://secure-vault-lake.vercel.app"]}}, supports_credentials=True)
     
     os.makedirs(app.instance_path, exist_ok=True)
@@ -32,6 +32,7 @@ def create_app():
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(passwords_bp, url_prefix='/api/passwords')
+    app.register_blueprint(notes_bp, url_prefix='/api/notes')
     app.register_blueprint(mfa_bp, url_prefix='/auth/mfa')
     
     with app.app_context():
