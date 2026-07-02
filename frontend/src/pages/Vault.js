@@ -22,26 +22,30 @@ const CATEGORY_COLORS = {
   Gaming:   'bg-rose-400',
   Shopping: 'bg-amber-400',
 };
-function StrengthBar({ criteria }) {
-  const met = Object.values(criteria).filter(Boolean).length;
-  const levels = [
-    { label: '',             color: ''                },
-    { label: 'Very weak',   color: 'bg-red-500'      },
-    { label: 'Weak',        color: 'bg-orange-500'   },
-    { label: 'Fair',        color: 'bg-yellow-500'   },
-    { label: 'Strong',      color: 'bg-lime-500'     },
-    { label: 'Very strong', color: 'bg-emerald-500'  },
+function PasswordCriteria({ criteria }) {
+  const items = [
+    { label: '8+ chars', met: criteria.length },
+    { label: 'Uppercase', met: criteria.uppercase },
+    { label: 'Lowercase', met: criteria.lowercase },
+    { label: 'Number', met: criteria.number },
+    { label: 'Symbol', met: criteria.special },
   ];
-  const level = levels[met] || levels[0];
-  if (met === 0) return null;
+  const hasAnyInput = Object.values(criteria).some(Boolean);
+  if (!hasAnyInput) return null;
   return (
-    <div className="mt-2 space-y-1">
-      <div className="flex gap-1">
-        {[1,2,3,4,5].map(i => (
-          <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= met ? level.color : 'bg-slate-700'}`} />
-        ))}
-      </div>
-      <p className="text-xs text-slate-500">{level.label}</p>
+    <div className="mt-3 flex flex-wrap gap-2">
+      {items.map(item => (
+        <span
+          key={item.label}
+          className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full transition-colors ${
+            item.met
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              : 'bg-slate-800 text-slate-500 border border-slate-700'
+          }`}
+        >
+          {item.label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -334,7 +338,7 @@ export default function Vault() {
                   <Wand2 size={18} /> {showGenerator ? 'Hide Generator' : 'Generate'}
                 </button>
               </div>
-              <StrengthBar criteria={criteria} />
+              <PasswordCriteria criteria={criteria} />
               {showGenerator && (
                 <div className="mt-4 p-5 bg-[#0B0F19]/80 rounded-2xl border border-emerald-500/20 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
                   <PasswordGenerator
