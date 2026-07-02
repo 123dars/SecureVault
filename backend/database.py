@@ -25,6 +25,14 @@ class Password(db.Model):
     encrypted_totp_secret = db.Column(db.LargeBinary, nullable=True)
     totp_iv = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class PasswordHistory(db.Model):
+    __tablename__ = 'password_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    password_id = db.Column(db.Integer, db.ForeignKey('passwords.id', ondelete='CASCADE'), nullable=False)
+    encrypted_password = db.Column(db.LargeBinary, nullable=False)
+    iv = db.Column(db.LargeBinary, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class Note(db.Model):
     __tablename__ = 'notes'
     
