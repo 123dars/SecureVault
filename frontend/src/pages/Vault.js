@@ -52,7 +52,7 @@ export default function Vault() {
   const [searchTerm,      setSearchTerm]      = useState('');
   const [filterCategory,  setFilterCategory]  = useState('All');
   
-  const [newForm,         setNewForm]         = useState({ site_name: '', username: '', password: '', totp_secret: '', category: 'General' });
+  const [newForm,         setNewForm]         = useState({ site_name: '', username: '', password: '', category: 'General' });
   const [showGenerator,   setShowGenerator]   = useState(false);
   const [showPassword,    setShowPassword]    = useState(false);
   const [sessionWarning,  setSessionWarning]  = useState(false);
@@ -65,10 +65,7 @@ export default function Vault() {
       const res = await api.get('/api/passwords');
       const decryptedVault = res.data.map(item => ({
         ...item,
-        password: decryptData(item.encrypted_password, item.iv, masterPassword),
-        totp_secret: item.encrypted_totp_secret 
-          ? decryptData(item.encrypted_totp_secret, item.totp_iv, masterPassword) 
-          : null
+        password: decryptData(item.encrypted_password, item.iv, masterPassword)
       }));
       setPasswords(decryptedVault);
     } catch (err) {
@@ -121,25 +118,15 @@ export default function Vault() {
     try {
       const pwdEncrypt = encryptData(newForm.password, masterPassword);
       
-      let totpCiphertext = null;
-      let totpIv = null;
-      if (newForm.totp_secret && newForm.totp_secret.trim() !== '') {
-        const cleanSecret = newForm.totp_secret.replace(/\s+/g, '').toUpperCase();
-        const totpEncrypt = encryptData(cleanSecret, masterPassword);
-        totpCiphertext = totpEncrypt.ciphertext;
-        totpIv = totpEncrypt.iv;
-      }
       await api.post('/api/passwords', {
         site_name:             newForm.site_name,
         username:              newForm.username,
         encrypted_password:    pwdEncrypt.ciphertext,
         iv:                    pwdEncrypt.iv,
-        encrypted_totp_secret: totpCiphertext,
-        totp_iv:               totpIv,
         category:              newForm.category,
       });
       
-      setNewForm({ site_name: '', username: '', password: '', totp_secret: '', category: 'General' });
+      setNewForm({ site_name: '', username: '', password: '', category: 'General' });
       setCriteria({ length: false, uppercase: false, lowercase: false, number: false, special: false });
       setShowGenerator(false);
       setShowPassword(false);
@@ -348,19 +335,6 @@ export default function Vault() {
                 </button>
               </div>
               <StrengthBar criteria={criteria} />
-              {/* NEW: Optional 2FA Secret Input */}
-              <div className="mt-4 relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Key size={16} className="text-emerald-500/50" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="2FA / TOTP Authenticator Secret (Optional)"
-                  value={newForm.totp_secret}
-                  onChange={e => setNewForm({ ...newForm, totp_secret: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-emerald-500/20 bg-emerald-950/20 text-emerald-400 placeholder-emerald-500/50 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono tracking-widest uppercase text-sm"
-                />
-              </div>
               {showGenerator && (
                 <div className="mt-4 p-5 bg-[#0B0F19]/80 rounded-2xl border border-emerald-500/20 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
                   <PasswordGenerator
@@ -438,7 +412,6 @@ export default function Vault() {
                 site_name={p.site_name}
                 username={p.username}
                 password={p.password}
-                totp_secret={p.totp_secret} 
                 category={p.category}
                 onCopy={(pwd) => {
                   navigator.clipboard.writeText(pwd);
