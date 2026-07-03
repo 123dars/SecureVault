@@ -160,9 +160,9 @@ export default function Register() {
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
                     tabIndex="-1"
-                    className="absolute right-5 top-4.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors bg-white dark:bg-[#18181b] p-1 rounded-md shadow-sm border border-slate-200 dark:border-slate-800"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
