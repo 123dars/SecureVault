@@ -3,6 +3,7 @@ from database import db, User, Password, Note
 from encryption import generate_salt
 import pyotp
 import bcrypt
+import base64
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from extensions import limiter 
 
@@ -113,8 +114,9 @@ def rotate_key():
     for item in updated_passwords:
         pw_record = Password.query.filter_by(id=item['id'], user_id=current_user_id).first()
         if pw_record:
-            pw_record.encrypted_password = item['encrypted_password']
-            pw_record.iv = item['iv']
+            # Decode the strings back into bytes for the database
+            pw_record.encrypted_password = base64.b64decode(item['encrypted_password'])
+            pw_record.iv = base64.b64decode(item['iv'])
 
     db.session.commit()
     return jsonify({"message": "Key rotation successful"}), 200
