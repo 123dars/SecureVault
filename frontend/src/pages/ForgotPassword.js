@@ -233,10 +233,10 @@ export default function ForgotPassword() {
                       <button
                         type="button"
                         onClick={() => setShowNewPw(!showNewPw)}
-                        className="absolute right-5 top-4.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors bg-white dark:bg-[#18181b] p-1 rounded-md shadow-sm border border-slate-200 dark:border-slate-800"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
                         tabIndex="-1"
                       >
-                        {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
                     <StrengthBar password={newPassword} />
@@ -258,10 +258,10 @@ export default function ForgotPassword() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPw(!showConfirmPw)}
-                      className="absolute right-5 top-4.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors bg-white dark:bg-[#18181b] p-1 rounded-md shadow-sm border border-slate-200 dark:border-slate-800"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
                       tabIndex="-1"
                     >
-                      {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
 
