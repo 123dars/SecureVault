@@ -124,10 +124,10 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-4.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors bg-white dark:bg-[#18181b] p-1 rounded-md shadow-sm border border-slate-200 dark:border-slate-800"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
                       tabIndex="-1"
                     >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
 
@@ -142,7 +142,7 @@ export default function Login() {
                     disabled={loading} 
                     className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-70 mt-6 shadow-lg shadow-indigo-600/30 active:scale-[0.98]"
                   >
-                    {loading ? <Loader2 className="animate-spin" size={22} /> : 'Decrypt & Login'}
+                    {loading ? <Loader2 className="animate-spin" size={22} /> : 'Login'}
                   </button>
                 </form>
               </div>
