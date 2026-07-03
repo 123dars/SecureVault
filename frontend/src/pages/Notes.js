@@ -10,6 +10,7 @@ import {
   Search, ShieldAlert, LogOut, Plus, ShieldCheck,
   Moon, Sun
 } from 'lucide-react';
+
 const COLORS = [
   { name: 'slate',   bg: 'bg-slate-500' },
   { name: 'emerald', bg: 'bg-emerald-500' },
@@ -18,6 +19,7 @@ const COLORS = [
   { name: 'rose',    bg: 'bg-rose-500' },
   { name: 'amber',   bg: 'bg-amber-500' },
 ];
+
 export default function Notes() {
   const { logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
@@ -28,9 +30,10 @@ export default function Notes() {
   const [newForm, setNewForm] = useState({ title: '', content: '', color: 'slate' });
   const [sessionWarning, setSessionWarning] = useState(false);
   const masterPassword = sessionStorage.getItem('masterPassword');
+
   const fetchNotes = useCallback(async () => {
     try {
-      const res = await api.get('/notes');
+      const res = await api.get('/api/notes');
       const decryptedVault = await Promise.all(res.data.map(async item => {
         let content = '';
         try {
@@ -50,12 +53,15 @@ export default function Notes() {
       setLoading(false);
     }
   }, [masterPassword]);
+
   useEffect(() => { fetchNotes(); }, [fetchNotes]);
+
   useEffect(() => {
     const warnTimer = setTimeout(() => setSessionWarning(true),  13 * 60 * 1000);
     const lockTimer = setTimeout(() => logout(),                 15 * 60 * 1000);
     return () => { clearTimeout(warnTimer); clearTimeout(lockTimer); };
   }, [logout]);
+
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!masterPassword) {
@@ -70,7 +76,7 @@ export default function Notes() {
     try {
       const encryptResult = await encryptData(newForm.content, masterPassword);
       
-      await api.post('/notes', {
+      await api.post('/api/notes', {
         title:             newForm.title,
         encrypted_content: encryptResult.ciphertext,
         iv:                encryptResult.iv,
@@ -85,6 +91,7 @@ export default function Notes() {
       toast.error("Failed to save note.");
     }
   };
+
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex items-center gap-3">
@@ -93,7 +100,7 @@ export default function Notes() {
           onClick={async () => {
             toast.dismiss(t.id);
             try {
-              await api.delete(`/notes/${id}`);
+              await api.delete(`/api/notes/${id}`);
               setNotes(prev => prev.filter(n => n.id !== id));
               toast.success("Note destroyed!", { icon: '🗑️' });
             } catch {
@@ -113,10 +120,12 @@ export default function Notes() {
       </div>
     ), { duration: 8000 });
   };
+
   const filteredNotes = notes.filter(n => 
     n.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
     n.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] font-sans selection:bg-indigo-500/30 pb-20 relative animate-in fade-in duration-300">
       
@@ -126,6 +135,7 @@ export default function Notes() {
       />
       <div className="fixed inset-0 bg-gradient-to-br from-[#09090b]/95 via-[#09090b]/90 to-indigo-950/20 pointer-events-none z-0 hidden dark:block" />
       <div className="fixed inset-0 bg-gradient-to-br from-slate-50/90 via-white/80 to-indigo-50/50 pointer-events-none z-0 dark:hidden" />
+      
       {sessionWarning && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/95 backdrop-blur-sm text-black text-sm font-bold text-center py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg">
           <ShieldAlert size={16} />
@@ -135,6 +145,7 @@ export default function Notes() {
           </button>
         </div>
       )}
+      
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/60 shadow-lg shadow-black/5 dark:shadow-black/50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -174,6 +185,7 @@ export default function Notes() {
           </div>
         </div>
       </nav>
+      
       <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
         <div className="mb-10 text-center">
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3">Private Text Vault</h2>
@@ -181,6 +193,7 @@ export default function Notes() {
             Encrypt and save your most sensitive text documents here. Bank routing numbers, secret keys, or private diaries—only you can read them.
           </p>
         </div>
+        
         <div className="bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
@@ -234,6 +247,7 @@ export default function Notes() {
             </div>
           </form>
         </div>
+        
         <div className="mb-8 relative max-w-xl mx-auto">
           <Search className="absolute left-4 top-4 text-slate-400 dark:text-slate-500" size={20} />
           <input
@@ -244,6 +258,7 @@ export default function Notes() {
             className="w-full pl-12 pr-4 py-3.5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-md text-slate-900 dark:text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-xl"
           />
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1, 2, 3].map(n => (
