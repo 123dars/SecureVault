@@ -72,7 +72,7 @@ export default function Vault() {
 
   const fetchPasswords = useCallback(async () => {
     try {
-      const res = await api.get('/passwords');
+      const res = await api.get('/api/passwords');
       const decryptedVault = await Promise.all(res.data.map(async item => {
         let password = '';
         try {
@@ -143,7 +143,7 @@ export default function Vault() {
     try {
       const pwdEncrypt = await encryptData(newForm.password, masterPassword);
       
-      await api.post('/passwords', {
+      await api.post('/api/passwords', {
         site_name:             newForm.site_name,
         username:              newForm.username,
         encrypted_password:    pwdEncrypt.ciphertext,
@@ -171,7 +171,7 @@ export default function Vault() {
           onClick={async () => {
             toast.dismiss(t.id);
             try {
-              await api.delete(`/passwords/${id}`);
+              await api.delete(`/api/passwords/${id}`);
               setPasswords(prev => prev.filter(p => p.id !== id));
               toast.success("Credential destroyed!", { icon: '🗑️' });
             } catch {
