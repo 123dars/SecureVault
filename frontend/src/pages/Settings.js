@@ -107,21 +107,30 @@ export default function Settings() {
     if (newPassword.length < 8) {
       toast.error("New password must be at least 8 characters!"); return;
     }
-    const derivedOldKey      = deriveKey(oldPassword, user.username);
+    
+    // AWAIT: deriveKey is asynchronous
+    const derivedOldKey      = await deriveKey(oldPassword, user.username);
     const currentSessionKey  = sessionStorage.getItem('masterPassword');
+    
     if (derivedOldKey !== currentSessionKey) {
       toast.error("Incorrect current master password!"); return;
     }
+    
     setIsRotating(true);
     const loadingToast = toast.loading("Re-encrypting your vault… do not close this window.");
     try {
-      const derivedNewKey = deriveKey(newPassword, user.username);
-      const res = await api.get('/passwords');
-      const updatedPasswords = res.data.map(item => {
-        const rawPass = decryptData(item.encrypted_password, item.iv, currentSessionKey);
-        const { ciphertext, iv } = encryptData(rawPass, derivedNewKey);
+      const derivedNewKey = await deriveKey(newPassword, user.username);
+      
+      // FIXED: /api/passwords instead of /passwords
+      const res = await api.get('/api/passwords');
+      
+      // AWAIT & Promise.all: map now awaits encryption/decryption
+      const updatedPasswords = await Promise.all(res.data.map(async item => {
+        const rawPass = await decryptData(item.encrypted_password, item.iv, currentSessionKey);
+        const { ciphertext, iv } = await encryptData(rawPass, derivedNewKey);
         return { id: item.id, encrypted_password: ciphertext, iv };
-      });
+      }));
+      
       await api.post('/auth/rotate-key', { new_password: newPassword, updated_passwords: updatedPasswords });
       sessionStorage.setItem('masterPassword', derivedNewKey);
       setOldPassword(''); setNewPassword(''); setConfirmPassword('');
@@ -137,12 +146,16 @@ export default function Settings() {
     const masterPassword = sessionStorage.getItem('masterPassword');
     if (!masterPassword) { toast.error("Session expired."); return; }
     try {
-      const res = await api.get('/passwords');
+      // FIXED: /api/passwords instead of /passwords
+      const res = await api.get('/api/passwords');
       let csvContent = "data:text/csv;charset=utf-8,Site,Username,Password,Category\n";
-      res.data.forEach(item => {
-        const rawPass = decryptData(item.encrypted_password, item.iv, masterPassword);
+      
+      // CHANGED: Use a for...of loop to properly await decryption
+      for (const item of res.data) {
+        const rawPass = await decryptData(item.encrypted_password, item.iv, masterPassword);
         csvContent += `"${item.site_name.replace(/"/g,'""')}","${(item.username||'').replace(/"/g,'""')}","${rawPass.replace(/"/g,'""')}","${item.category}"\n`;
-      });
+      }
+      
       const link = document.createElement("a");
       link.setAttribute("href", encodeURI(csvContent));
       link.setAttribute("download", `${user?.username}_vault_export.csv`);
