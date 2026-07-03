@@ -6,15 +6,15 @@ import api from '../api';
 import { encryptData, decryptData } from '../crypto';
 import { runSecurityAudit } from '../utils/securityAudit';
 import PasswordCard from '../components/PasswordCard';
-import EmptyVault from '../components/EmptyVault';
 import SkeletonCard from '../components/SkeletonCard';
 import PasswordGenerator from '../components/PasswordGenerator';
 import toast from 'react-hot-toast';
 import {
   Search, Filter, ShieldCheck,
   LogOut, Wand2, ShieldAlert, Copy, Eye, EyeOff, ChevronDown,
-  Moon, Sun
+  Moon, Sun, ShieldOff, Plus, Lock
 } from 'lucide-react';
+
 const CATEGORIES = ['General', 'Work', 'Finance', 'Social', 'Gaming', 'Shopping'];
 const CATEGORY_COLORS = {
   General:  'bg-slate-400',
@@ -24,6 +24,7 @@ const CATEGORY_COLORS = {
   Gaming:   'bg-rose-500',
   Shopping: 'bg-amber-500',
 };
+
 function PasswordCriteria({ criteria }) {
   const items = [
     { label: '8+ chars', met: criteria.length },
@@ -51,6 +52,7 @@ function PasswordCriteria({ criteria }) {
     </div>
   );
 }
+
 export default function Vault() {
   const { logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
@@ -67,6 +69,7 @@ export default function Vault() {
     length: false, uppercase: false, lowercase: false, number: false, special: false,
   });
   const masterPassword = sessionStorage.getItem('masterPassword');
+
   const fetchPasswords = useCallback(async () => {
     try {
       const res = await api.get('/passwords');
@@ -89,20 +92,25 @@ export default function Vault() {
       setLoading(false);
     }
   }, [masterPassword]);
+
   useEffect(() => { fetchPasswords(); }, [fetchPasswords]);
+  
   useEffect(() => {
     const warnTimer = setTimeout(() => setSessionWarning(true),  13 * 60 * 1000);
     const lockTimer = setTimeout(() => logout(),                 15 * 60 * 1000);
     return () => { clearTimeout(warnTimer); clearTimeout(lockTimer); };
   }, [logout]);
+
   const vaultHealth = useMemo(() => {
     if (passwords.length === 0) return { totalScore: 100, weakPasswords: [], reusedPasswords: [] };
     return runSecurityAudit(passwords);
   }, [passwords]);
+
   const scoreColor =
     vaultHealth.totalScore === 100 ? 'text-indigo-600 dark:text-indigo-400 border-indigo-500' :
     vaultHealth.totalScore >= 70   ? 'text-amber-500 dark:text-amber-400 border-amber-500'     :
                                      'text-rose-500 dark:text-rose-400 border-rose-500';
+
   const handlePasswordChange = (e) => {
     const val = e.target.value;
     setNewForm({ ...newForm, password: val });
@@ -114,11 +122,13 @@ export default function Vault() {
       special:   /[^A-Za-z0-9]/.test(val),
     });
   };
+
   const handleCopyPassword = () => {
     if (!newForm.password) return;
     navigator.clipboard.writeText(newForm.password);
     toast.success("Password copied!", { icon: '📋' });
   };
+
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!masterPassword) {
@@ -152,6 +162,7 @@ export default function Vault() {
       toast.error("Failed to save credential.");
     }
   };
+
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex items-center gap-3">
@@ -180,15 +191,18 @@ export default function Vault() {
       </div>
     ), { duration: 8000 });
   };
+
   const filteredPasswords = passwords.filter(p => {
     const matchesSearch   = p.site_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (p.username && p.username.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = filterCategory === 'All' || p.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
+
   const scrollToForm = () => {
     document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
   };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] font-sans selection:bg-indigo-500/30 pb-20 relative animate-in fade-in duration-300">
       <div
@@ -197,6 +211,7 @@ export default function Vault() {
       />
       <div className="fixed inset-0 bg-gradient-to-br from-[#09090b]/95 via-[#09090b]/90 to-indigo-950/20 pointer-events-none z-0 hidden dark:block" />
       <div className="fixed inset-0 bg-gradient-to-br from-slate-50/90 via-white/80 to-indigo-50/50 pointer-events-none z-0 dark:hidden" />
+      
       {sessionWarning && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/95 backdrop-blur-sm text-black text-sm font-bold text-center py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg">
           <ShieldAlert size={16} />
@@ -209,6 +224,7 @@ export default function Vault() {
           </button>
         </div>
       )}
+      
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/60 shadow-lg shadow-black/5 dark:shadow-black/50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -256,6 +272,7 @@ export default function Vault() {
           </div>
         </div>
       </nav>
+      
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {!loading && passwords.length > 0 && (
           <div className="bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -289,6 +306,7 @@ export default function Vault() {
             </div>
           </div>
         )}
+        
         <div className="bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl mb-10">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
             <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 w-8 h-8 flex items-center justify-center rounded-xl text-sm border border-indigo-200 dark:border-indigo-500/30 font-black">+</span>
@@ -392,6 +410,7 @@ export default function Vault() {
             </div>
           </form>
         </div>
+        
         <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-xl p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-3.5 text-slate-400 dark:text-slate-500" size={20} />
@@ -436,6 +455,7 @@ export default function Vault() {
             </div>
           </div>
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1, 2, 3].map(n => <SkeletonCard key={n} />)
@@ -457,7 +477,35 @@ export default function Vault() {
               />
             ))
           ) : (
-            <EmptyVault onAdd={scrollToForm} />
+            <div className="col-span-full text-center py-20 px-4 animate-in fade-in zoom-in-95 duration-500 max-w-lg mx-auto">
+              {/* Indigo Shield Icon */}
+              <div className="w-24 h-24 bg-indigo-50 dark:bg-indigo-500/10 rounded-[2.5rem] border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center mx-auto mb-8 shadow-inner shadow-indigo-500/10 transform transition-transform hover:scale-105 duration-300">
+                <ShieldOff size={44} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+              
+              {/* Text */}
+              <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">Your vault is empty</h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium leading-relaxed">
+                No credentials stored yet. Add your first password to start building your encrypted vault.
+              </p>
+              
+              {/* Security Badges */}
+              <div className="flex justify-center gap-3 mb-10 flex-wrap">
+                {['AES-256 encrypted', 'Zero-knowledge', 'Stored locally'].map(badge => (
+                  <span key={badge} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-[#18181b] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <Lock size={12} className="text-indigo-500" /> {badge}
+                  </span>
+                ))}
+              </div>
+
+              {/* Indigo Add Button */}
+              <button 
+                onClick={scrollToForm}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 px-8 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-600/30 active:scale-[0.98]"
+              >
+                <Plus size={22} /> Add your first credential
+              </button>
+            </div>
           )}
         </div>
       </main>
