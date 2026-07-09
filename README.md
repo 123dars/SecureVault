@@ -55,5 +55,50 @@ SecureVault/
 │   ├── src/                  # React Components & Context Providers
 │   ├── nginx.conf            # Reverse Proxy traffic routing rules
 │   └── Dockerfile.prod       # Multi-stage Nginx build blueprint
+├── fuzzer.py                 # Automated security testing script
 ├── docker-compose.yml        # Development Orchestrator
 └── docker-compose.prod.yml   # Production Orchestrator
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Docker** and **Docker Compose** installed on your machine.
+- Ports `80` (Frontend) and `5000` (Backend API) must be available.
+
+### Installation & Boot
+To spin up the entire microservices architecture locally:
+
+1. Clone the repository to your local machine.
+2. Open a terminal in the root directory.
+3. Run the development orchestrator:
+```bash
+docker-compose up --build
+```
+4. Access the web interface at `http://localhost`.
+
+---
+
+## 🛡️ Automated Security Testing
+SecureVault comes with an automated API fuzzer (`fuzzer.py`) to validate backend rate-limiting and test for common injection vulnerabilities.
+
+To run the fuzzer against your local instance:
+```bash
+python fuzzer.py
+```
+*Note: This will intentionally trigger rate-limit blocks (HTTP 429) to verify DDoS mitigation.*
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute this software for educational or commercial purposes. See the `LICENSE` file for more details.
+
+---
+
+## 👨‍💻 Developed By
+
+**Darshan B.**  
+*Cybersecurity & Software Engineering Portfolio Project*
