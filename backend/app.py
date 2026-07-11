@@ -38,6 +38,10 @@ def create_app():
     with app.app_context():
         db.create_all()
         
+    @app.route('/')
+    def index():
+        return {"status": "SecureVault API is online and fully operational.", "version": "1.0", "architecture": "Zero-Knowledge"}, 200
+        
     return app
 app = create_app()
 if __name__ == '__main__':
