@@ -9,6 +9,13 @@
 
 ---
 
+## 🔗 Live Demo
+
+- **🟢 Live Frontend Dashboard:** [https://securevault-frontend.onrender.com](https://securevault-frontend.onrender.com) *(Update this with your actual frontend Render URL)*
+- **⚙️ Live Backend API:** [https://securevault-i2bo.onrender.com](https://securevault-i2bo.onrender.com)
+
+---
+
 ## ✨ System Highlights
 
 * **Zero-Knowledge Proofs:** The server never receives, processes, or stores your master password or plaintext credentials. It is mathematically impossible for the server to read your data.
