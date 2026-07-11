@@ -11,7 +11,7 @@
 
 ## 🔗 Live Demo
 
-- **🟢 Live Frontend Dashboard:** [https://securevault-frontend.onrender.com](https://securevault-frontend.onrender.com) *(Update this with your actual frontend Render URL)*
+- **🟢 Live Frontend Dashboard:** [https://secure-vault-lake.vercel.app](https://secure-vault-lake.vercel.app)
 - **⚙️ Live Backend API:** [https://securevault-i2bo.onrender.com](https://securevault-i2bo.onrender.com)
 
 ---
